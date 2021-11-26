@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 public class QuestionsBank {
     ArrayList<Questions> questionsList = new ArrayList<>();
-
     public QuestionsBank(){
 
     }

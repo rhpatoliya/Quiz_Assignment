@@ -24,8 +24,10 @@ public class MainActivity extends AppCompatActivity {
     QuestionsBank questionsBank = new QuestionsBank();
     Button true_btu, false_btu;
     private int currentQuestionsIndex = 0;
-    ArrayList<Questions> getArraylist = new ArrayList<>();
+    ArrayList<Questions> answerList = new ArrayList<>();
     Context context;
+    int correctAnswer = 0;
+
 
 
     @Override
@@ -37,12 +39,19 @@ public class MainActivity extends AppCompatActivity {
         true_btu = (Button) findViewById(R.id.true_btu);
         false_btu = (Button) findViewById(R.id.false_btu);
 
-        FragmentManager manager = getSupportFragmentManager();
-        manager.findFragmentById(R.id.framelayout);
-        QuestionsFragment fragmentDemo = QuestionsFragment.newInstance(questionsBank.questionsList.get(0).questionsid, questionsBank.questionsList.get(0).colorid);
-        manager.beginTransaction().add(R.id.framelayout, fragmentDemo, "tag").commit();
+      updateFragment();
+
         //checkAnswer(true);
         // currentQuestionsIndex ++;
+
+
+    }
+
+    private void updateFragment() {
+        FragmentManager manager = getSupportFragmentManager();
+        manager.findFragmentById(R.id.framelayout);
+        QuestionsFragment fragmentDemo = QuestionsFragment.newInstance(questionsBank.questionsList.get(currentQuestionsIndex).questionsid, questionsBank.questionsList.get(currentQuestionsIndex).colorid);
+        manager.beginTransaction().add(R.id.framelayout, fragmentDemo, "tag").commit();
 
 
     }
@@ -75,71 +84,72 @@ public class MainActivity extends AppCompatActivity {
         switch (view.getId()) {
             case R.id.true_btu:
                 Toast.makeText(MainActivity.this, "True", Toast.LENGTH_SHORT).show();
-
-                updateQuestion();
-                //currentQuestionsIndex ++;
-
-                currentQuestionsIndex = (currentQuestionsIndex + 1) % questionsBank.questionsList.size();
-                updateQuestion();
-
-
-                FragmentManager manager = getSupportFragmentManager();
-                manager.findFragmentById(R.id.framelayout);
-                QuestionsFragment fragmentDemo = QuestionsFragment.newInstance(questionsBank.questionsList.get(currentQuestionsIndex).questionsid, questionsBank.questionsList.get(currentQuestionsIndex).colorid);
-                manager.beginTransaction().add(R.id.framelayout, fragmentDemo, "tag").commit();
-                //currentQuestionsIndex = (currentQuestionsIndex + 1) % questionsBank.questionsList.size();
-
                 checkAnswer(true);
-                System.out.println(getArraylist);
+                updateIndex();
+                updateFragment();
                 break;
 
 
             case R.id.false_btu:
                 Toast.makeText(MainActivity.this, "False", Toast.LENGTH_SHORT).show();
-
-                updateQuestion();
-                currentQuestionsIndex++;
-
-                manager = getSupportFragmentManager();
-                manager.findFragmentById(R.id.framelayout);
-                fragmentDemo = QuestionsFragment.newInstance(questionsBank.questionsList.get(currentQuestionsIndex).questionsid, questionsBank.questionsList.get(currentQuestionsIndex).colorid);
-                manager.beginTransaction().add(R.id.framelayout, fragmentDemo, "tag").commit();
-                // currentQuestionsIndex ++;
                 checkAnswer(false);
-                //updateQuestion();
-                System.out.println(getArraylist);
+                updateIndex();
+                updateFragment();
                 break;
         }
 
     }
 
-    private void updateQuestion() {
+    private void showDialoag() {
 
         Log.d("Current", "Onclick" + currentQuestionsIndex);
 
-        if ((currentQuestionsIndex >= questionsBank.questionsList.size())) {
-            AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
-            alertDialog.setTitle("Alert");
-            alertDialog.setMessage("Alert message to be shown");
-            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
-            alertDialog.show();
-        }
 
+        AlertDialog.Builder adb = new AlertDialog.Builder(this);
+
+        adb.setTitle("Result");
+        adb.setMessage("Your score is " + correctAnswer + " out of " + questionsBank.questionsList.size());
+
+        adb.setPositiveButton("Save", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                correctAnswer = 0;
+                answerList = new ArrayList<>();
+
+            } });
+
+
+        adb.setNegativeButton("Ignore", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                correctAnswer = 0;
+                answerList = new ArrayList<>();
+
+
+            } });
+        adb.show();
+
+
+        }
+        public void updateIndex(){
+            if(currentQuestionsIndex == (questionsBank.questionsList.size()-1)){
+                showDialoag();
+                currentQuestionsIndex=0;
+
+            }
+            else{
+                currentQuestionsIndex++;
+            }
         }
 
         private void checkAnswer ( boolean userChoosenCorrect){
-            //currentQuestionsIndex++;
-
-            boolean answeIsTrue = questionsBank.questionsList.get(currentQuestionsIndex).answers;
+        Questions questions = questionsBank.questionsList.get(currentQuestionsIndex);
+            boolean answeIsTrue = questions.answers;
 
             int toastMessageId = 0;
             if (userChoosenCorrect == answeIsTrue) {
                 toastMessageId = R.string.correct_answer;
+                questions.setQuestions(this.getResources().getString(questions.questionsid));
+                correctAnswer++;
+                answerList.add(questions);
             } else {
                 toastMessageId = R.string.wrong_answer;
             }

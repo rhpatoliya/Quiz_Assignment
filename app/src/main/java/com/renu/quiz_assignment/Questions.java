@@ -7,12 +7,27 @@ public class Questions {
     Boolean answers;
     String colorid;
 
+    public String getQuestions() {
+        return questions;
+    }
+
+    public void setQuestions(String questions) {
+        this.questions = questions;
+    }
+
+    String questions;
+
 
     public Questions(int question1, boolean answers, String color) {
         this.questionsid = question1;
         this.answers = answers;
         this.colorid = color;
+
     }
+    public String toString() {
+        return questions + " : " + answers;
+    }
+
 
     public int getText() {
         return questionsid;
